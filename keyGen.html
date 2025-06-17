@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chatbot Key Generator - Admin Panel</title>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, orderBy, query, limit, getDoc, Timestamp, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmDLSB0S_0qnrcl5tsaSVyRQaopy8M12I",
+      authDomain: "aib4n1x.firebaseapp.com",
+      projectId: "aib4n1x",
+      storageBucket: "aib4n1x.firebasestorage.app",
+      messagingSenderId: "318019512167",
+      appId: "1:318019512167:web:9dae7a6654bf7a9fbd31c2",
+      measurementId: "G-4W0QEKN332"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // Make Firebase available globally
+    window.firebaseDB = db;
+    window.firebaseAuth = auth;
+    window.googleProvider = googleProvider;
+    window.firebaseModules = {
+       collection, doc, setDoc, getDocs, deleteDoc, orderBy, query, limit, getDoc, Timestamp, serverTimestamp,
+      signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged
+    };
+
+    // Signal that Firebase is ready
+    window.firebaseReady = true;
+    window.dispatchEvent(new Event('firebaseReady'));
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #6b46c1;
+      --primary-dark: #553c9a;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    :root[data-theme="dark"] {
+      --primary-color: #a78bfa;
+      --primary-dark: #7c3aed;
+      --bg-color: #111827;
+      --card-bg: #1f2937;
+      --text-color: #f9fafb;
+      --border-color: #374151;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      padding: 1rem;
+      transition: var(--transition);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Login Screen Styles */
+    .login-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 1.5rem;
+      padding: 3rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-header {
+      margin-bottom: 2rem;
+    }
+
+    .login-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .login-form {
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 0.9375rem;
+      background: var(--card-bg);
+      color: var(--text-color);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+    }
+
+    .form-checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .form-checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      accent-color: var(--primary-color);
+    }
+
+    .form-checkbox-label {
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.875rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      min-width: 120px;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-google {
+      background: #4285f4;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .btn-google:hover {
+      background: #357ae8;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-error {
+      background: var(--error-color);
+      color: white;
+    }
+
+    .btn-warning {
+      background: var(--warning-color);
+      color: white;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      margin: 1.5rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .divider span {
+      background: var(--card-bg);
+      padding: 0 1rem;
+      color: var(--text-color);
+      opacity: 0.7;
+      font-size: 0.875rem;
+      position: relative;
+    }
+
+    .access-denied {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      border: 2px solid var(--error-color);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .access-denied h3 {
+      color: var(--error-color);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Admin Panel Styles */
+    .admin-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem;
+      background: var(--card-bg);
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      min-width: auto;
+      width: auto;
+    }
+
+    .header h1 {
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .header p {
+      opacity: 0.7;
+      font-size: 1rem;
+    }
+
+    .user-info {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: rgba(107, 70, 193, 0.1);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .panel-section {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .generated-key {
+      background: linear-gradient(135deg, #e0e7ff, #f0f9ff);
+      border: 2px dashed var(--primary-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+      display: none;
+    }
+
+    .generated-key.show {
+      display: block;
+    }
+
+    .key-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 1rem 0;
+      letter-spacing: 0.1em;
+      word-break: break-all;
+    }
+
+    .key-url {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--text-color);
+      background: rgba(0, 0, 0, 0.05);
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin: 0.5rem 0;
+      word-break: break-all;
+    }
+
+    .keys-list {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .keys-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .keys-table th,
+    .keys-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .keys-table th {
+      background: var(--bg-color);
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .key-status {
+      padding: 0.25rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-expired {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-used {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      background: var(--success-color);
+    }
+
+    .toast.error {
+      background: var(--error-color);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .admin-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .keys-table {
+        font-size: 0.75rem;
+      }
+
+      .keys-table th,
+      .keys-table td {
+        padding: 0.5rem;
+      }
+
+      .login-card {
+        margin: 1rem;
+        padding: 2rem;
+      }
+
+      .logout-btn {
+        position: static;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <h1 class="login-title">🔐 Admin Login</h1>
+        <p class="login-subtitle">AI Chatbot Key Generator Access</p>
+      </div>
+
+      <!-- Google Login -->
+      <button id="google-login-btn" class="btn btn-google">
+        <span>🌐 Sign in with Google</span>
+        <div class="loading" id="google-loading" style="display: none;"></div>
+      </button>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Email/Password Login -->
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="login-email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="login-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <span id="login-btn-text">Sign In</span>
+          <div class="loading" id="login-loading" style="display: none;"></div>
+        </button>
+      </form>
+
+      <div id="access-denied" class="access-denied hidden">
+        <h3>🚫 Access Denied</h3>
+        <p>Your account does not have administrator privileges. Please contact the system administrator for access.</p>
+        <button class="btn btn-secondary" onclick="window.authManager.signOut()" style="margin-top: 1rem;">Try Different Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" class="container hidden">
+    <div class="header">
+      <button id="logout-btn" class="btn btn-secondary logout-btn">Logout</button>
+      <h1>🔐 AI Chatbot Key Generator</h1>
+      <p>Generate and manage activation keys for the AI Chatbot system</p>
+      <div id="user-info" class="user-info">
+        Welcome, <span id="user-display-name"></span>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="total-keys">0</div>
+        <div class="stat-label">Total Keys</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="active-keys">0</div>
+        <div class="stat-label">Active Keys</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="expired-keys">0</div>
+        <div class="stat-label">Expired Keys</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="used-keys">0</div>
+        <div class="stat-label">Used Keys</div>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <!-- Key Generation Panel -->
+      <div class="panel-section">
+        <h2 class="panel-title">🎯 Generate New Key</h2>
+        
+        <form id="key-form">
+          <div class="form-group">
+            <label class="form-label">Key Type</label>
+            <select class="form-select" id="key-type">
+              <option value="permanent">Permanent Key</option>
+              <option value="expiring">Expiring Key</option>
+              <option value="onetime">One-Time Use Key</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="expiry-group" style="display: none;">
+            <label class="form-label">Expiration Date</label>
+            <input type="datetime-local" class="form-input" id="expiry-date">
+          </div>
+
+          <div class="form-group form-checkbox-group" id="one-time-checkbox-group">
+            <input type="checkbox" class="form-checkbox" id="one-time-use" name="one-time-use">
+            <label class="form-checkbox-label" for="one-time-use">
+              One-time use per device
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Key Length</label>
+            <select class="form-select" id="key-length">
+              <option value="6">6 characters</option>
+              <option value="8">8 characters</option>
+              <option value="10" selected>10 characters</option>
+              <option value="12">12 characters</option>
+              <option value="16">16 characters</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description (Optional)</label>
+            <input type="text" class="form-input" id="key-description" placeholder="e.g., VIP User Access, Trial Account, etc.">
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <span id="generate-btn-text">Generate Key</span>
+            <div class="loading" id="generate-loading" style="display: none;"></div>
+          </button>
+        </form>
+
+        <div class="generated-key" id="generated-key">
+          <h3 style="margin-bottom: 1rem; color: var(--success-color);">✅ Key Generated Successfully!</h3>
+          <div class="key-display" id="key-display"></div>
+          <div class="key-url" id="key-url"></div>
+          <button class="btn btn-success" onclick="copyToClipboard()">📋 Copy Key</button>
+          <button class="btn btn-primary" onclick="copyUrlToClipboard()">🔗 Copy URL</button>
+        </div>
+      </div>
+
+      <!-- Key Management Panel -->
+      <div class="panel-section">
+        <h2 class="panel-title">⚙️ Key Management</h2>
+        
+        <div class="form-group">
+          <label class="form-label">Bulk Generation</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="number" class="form-input" id="bulk-count" placeholder="Number of keys" min="1" max="50" style="flex: 1;">
+            <button class="btn btn-primary" onclick="generateBulkKeys()">Generate Bulk</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Quick Actions</label>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="btn btn-warning" onclick="cleanupExpired()">🧹 Cleanup Expired Keys</button>
+            <button class="btn btn-error" onclick="deleteAllKeys()">🗑️ Delete All Keys</button>
+            <button class="btn btn-primary" onclick="exportKeys()">📊 Export Keys Data</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Search Keys</label>
+          <input type="text" class="form-input" id="search-keys" placeholder="Search by key ID or description..." oninput="filterKeys()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Keys List -->
+    <div class="keys-list">
+      <h2 class="panel-title">📋 All Generated Keys</h2>
+      
+      <div style="margin-bottom: 1rem;">
+        <button class="btn btn-primary" onclick="refreshKeys()">
+          <span id="refresh-text">🔄 Refresh List</span>
+          <div class="loading" id="refresh-loading" style="display: none;"></div>
+        </button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="keys-table">
+          <thead>
+            <tr>
+              <th>Key ID</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Expires</th>
+              <th>Device</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="keys-table-body">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 2rem;">
+                Loading keys... <div class="loading" style="display: inline-block; margin-left: 0.5rem;"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Wait for Firebase to be ready
+    function initializeApp() {
+      if (!window.firebaseReady) {
+        setTimeout(initializeApp, 100);
+        return;
+      }
+
+      // Authentication Manager
+      class AuthManager {
+        constructor() {
+          this.authorizedAdmins = ['bE8LyeQPcEQijHjHZX17ALnqGfz2']; // Admin UIDs
+          this.currentUser = null;
+          this.init();
+        }
+
+        async init() {
+          if (!window.firebaseAuth || !window.firebaseModules) {
+            console.error('Firebase Auth not initialized');
+            return;
+          }
+
+          const { onAuthStateChanged } = window.firebaseModules;
+          
+          onAuthStateChanged(window.firebaseAuth, (user) => {
+            this.handleAuthStateChange(user);
+          });
+
+          this.setupEventListeners();
+        }
+
+        setupEventListeners() {
+          // Google login
+          document.getElementById('google-login-btn').addEventListener('click', () => {
+            this.signInWithGoogle();
+          });
+
+          // Email/password login
+          document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.signInWithEmail();
+          });
+
+          // Logout
+          document.getElementById('logout-btn').addEventListener('click', () => {
+            this.signOut();
+          });
+        }
+
+        async signInWithGoogle() {
+          this.showLoginLoading('google', true);
+
+          try {
+            const { signInWithPopup } = window.firebaseModules;
+            const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
+            // Auth state change handler will take care of the rest
+          } catch (error) {
+            console.error('Google sign-in error:', error);
+            this.showToast('Failed to sign in with Google', 'error');
+          } finally {
+            this.showLoginLoading('google', false);
+          }
+        }
+
+        async signInWithEmail() {
+          const email = document.getElementById('login-email').value;
+          const password = document.getElementById('login-password').value;
+
+          if (!email || !password) {
+            this.showToast('Please enter email and password', 'error');
+            return;
+          }
+
+          this.showLoginLoading('email', true);
+
+          try {
+            const { signInWithEmailAndPassword } = window.firebaseModules;
+            const result = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            // Auth state change handler will take care of the rest
+          } catch (error) {
+            console.error('Email sign-in error:', error);
+            let message = 'Failed to sign in';
+            
+            if (error.code === 'auth/user-not-found') message = 'No account found with this email';
+            else if (error.code === 'auth/wrong-password') message = 'Incorrect password';
+            else if (error.code === 'auth/invalid-email') message = 'Invalid email address';
+            
+            this.showToast(message, 'error');
+          } finally {
+            this.showLoginLoading('email', false);
+          }
+        }
+
+        async signOut() {
+          try {
+            const { signOut } = window.firebaseModules;
+            await signOut(window.firebaseAuth);
+            this.showToast('Signed out successfully', 'success');
+          } catch (error) {
+            console.error('Sign out error:', error);
+            this.showToast('Failed to sign out', 'error');
+          }
+        }
+
+        handleAuthStateChange(user) {
+          if (user) {
+            // Check if user is authorized admin
+            if (this.isAuthorizedAdmin(user.uid)) {
+              this.currentUser = user;
+              this.showAdminPanel();
+              this.displayUserInfo();
+              
+              // Initialize key generator after successful auth
+              if (window.keyGenerator) {
+                window.keyGenerator.refreshKeys();
+              } else {
+                window.keyGenerator = new KeyGenerator();
+              }
+            } else {
+              this.showAccessDenied();
+            }
+          } else {
+            this.currentUser = null;
+            this.showLoginScreen();
+          }
+        }
+
+        isAuthorizedAdmin(uid) {
+          return this.authorizedAdmins.includes(uid);
+        }
+
+        showLoginScreen() {
+          document.getElementById('login-screen').classList.remove('hidden');
+          document.getElementById('admin-panel').classList.add('hidden');
+          document.getElementById('access-denied').classList.add('hidden');
+          this.resetLoginForm();
+        }
+
+        showAdminPanel() {
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('admin-panel').classList.remove('hidden');
+          document.getElementById('access-denied').classList.add('hidden');
+        }
+
+        showAccessDenied() {
+          document.getElementById('access-denied').classList.remove('hidden');
+        }
+
+        displayUserInfo() {
+          if (this.currentUser) {
+            const displayName = this.currentUser.displayName || this.currentUser.email || 'Admin';
+            document.getElementById('user-display-name').textContent = displayName;
+          }
+        }
+
+        showLoginLoading(type, show) {
+          if (type === 'google') {
+            const btn = document.getElementById('google-login-btn');
+            const loading = document.getElementById('google-loading');
+            
+            btn.disabled = show;
+            if (show) {
+              btn.querySelector('span').style.display = 'none';
+              loading.style.display = 'inline-block';
+            } else {
+              btn.querySelector('span').style.display = 'inline';
+              loading.style.display = 'none';
+            }
+          } else if (type === 'email') {
+            const btn = document.querySelector('#login-form button');
+            const loading = document.getElementById('login-loading');
+            const text = document.getElementById('login-btn-text');
+            
+            btn.disabled = show;
+            if (show) {
+              text.style.display = 'none';
+              loading.style.display = 'inline-block';
+            } else {
+              text.style.display = 'inline';
+              loading.style.display = 'none';
+            }
+          }
+        }
+
+        resetLoginForm() {
+          document.getElementById('login-form').reset();
+          this.showLoginLoading('google', false);
+          this.showLoginLoading('email', false);
+        }
+
+        showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          toast.textContent = message;
+          
+          document.body.appendChild(toast);
+          
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+      }
+
+      // Key Generator System
+      class KeyGenerator {
+        constructor() {
+          this.baseUrl = 'https://barnigonz.github.io/Aib4n1x/';
+          this.currentGeneratedKey = null;
+          this.allKeys = [];
+          this.filteredKeys = [];
+          this.init();
+        }
+
+        async init() {
+          // Set minimum date to today
+          const now = new Date();
+          now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+          document.getElementById('expiry-date').min = now.toISOString().slice(0, 16);
+          
+          // Load existing keys
+          await this.refreshKeys();
+          
+          // Setup form handlers
+          this.setupEventListeners();
+        }
+
+        setupEventListeners() {
+          // Key type change handler
+          document.getElementById('key-type').addEventListener('change', (e) => {
+            const expiryGroup = document.getElementById('expiry-group');
+            const oneTimeCheckboxGroup = document.getElementById('one-time-checkbox-group');
+            const oneTimeCheckbox = document.getElementById('one-time-use');
+            
+            if (e.target.value === 'expiring') {
+              expiryGroup.style.display = 'block';
+              document.getElementById('expiry-date').required = true;
+              oneTimeCheckboxGroup.style.display = 'flex';
+              oneTimeCheckbox.checked = false;
+            } else if (e.target.value === 'permanent') {
+              expiryGroup.style.display = 'none';
+              document.getElementById('expiry-date').required = false;
+              oneTimeCheckboxGroup.style.display = 'flex';
+              oneTimeCheckbox.checked = false;
+            } else if (e.target.value === 'onetime') {
+              expiryGroup.style.display = 'none';
+              document.getElementById('expiry-date').required = false;
+              oneTimeCheckboxGroup.style.display = 'none';
+              oneTimeCheckbox.checked = true;
+            }
+          });
+
+          // Form submit handler
+          document.getElementById('key-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.generateKey();
+          });
+        }
+
+        generateKeyString(length) {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let result = '';
+          for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return result;
+        }
+
+        async generateKey() {
+          if (!window.firebaseDB || !window.firebaseModules) {
+            this.showToast('Firebase not initialized', 'error');
+            return;
+          }
+
+          // Show loading
+          document.getElementById('generate-btn-text').style.display = 'none';
+          document.getElementById('generate-loading').style.display = 'inline-block';
+          document.querySelector('#key-form button').disabled = true;
+
+          try {
+            const keyType = document.getElementById('key-type').value;
+            const keyLength = parseInt(document.getElementById('key-length').value);
+            const description = document.getElementById('key-description').value.trim();
+            const expiryDate = document.getElementById('expiry-date').value;
+            const isOneTime = document.getElementById('one-time-use').checked || keyType === 'onetime';
+
+            // Generate unique key
+            let keyId;
+            let exists = true;
+            
+            while (exists) {
+              keyId = this.generateKeyString(keyLength);
+              try {
+                const { doc, getDoc } = window.firebaseModules;
+                const keyDoc = await getDoc(doc(window.firebaseDB, 'activation_keys', keyId));
+                exists = keyDoc.exists();
+              } catch (error) {
+                exists = false; // If error checking, assume it doesn't exist
+              }
+            }
+
+            // Prepare key data with proper Firestore fields
+            const keyData = {
+              id: keyId,
+              type: keyType,
+              isOneTime: isOneTime,
+              createdAt: new Date().toISOString(), // Store as ISO string instead of Timestamp
+              createdBy: window.authManager.currentUser?.uid || 'admin',
+              isUsed: false,
+              deviceId: null,
+              activatedAt: null,
+              description: description || '',
+              activatedFrom: null
+            };
+
+            // Add expiration date if needed
+            if (keyType === 'expiring' && expiryDate) {
+              keyData.expiresAt = new Date(expiryDate).toISOString();
+            }
+
+            // Save to Firebase
+            const { doc, setDoc } = window.firebaseModules;
+            await setDoc(doc(window.firebaseDB, 'activation_keys', keyId), keyData);
+
+            // Store current generated key
+            this.currentGeneratedKey = keyId;
+
+            // Show generated key
+            this.displayGeneratedKey(keyId, keyData);
+            
+            // Reset form
+            document.getElementById('key-form').reset();
+            document.getElementById('expiry-group').style.display = 'none';
+            document.getElementById('one-time-checkbox-group').style.display = 'flex';
+            document.getElementById('one-time-use').checked = false;
+            
+            this.showToast('Key generated successfully!', 'success');
+            
+            // Refresh keys list
+            await this.refreshKeys();
+
+          } catch (error) {
+            console.error('Error generating key:', error);
+            this.showToast(`Failed to generate key: ${error.message || 'Unknown error'}`, 'error');
+          } finally {
+            // Hide loading
+            document.getElementById('generate-btn-text').style.display = 'inline';
+            document.getElementById('generate-loading').style.display = 'none';
+            document.querySelector('#key-form button').disabled = false;
+          }
+        }
+
+        displayGeneratedKey(keyId, keyData) {
+          const generatedKeyDiv = document.getElementById('generated-key');
+          const keyDisplay = document.getElementById('key-display');
+          const keyUrl = document.getElementById('key-url');
+
+          keyDisplay.textContent = keyId;
+          keyUrl.textContent = `${this.baseUrl}${keyId}`;
+          
+          generatedKeyDiv.classList.add('show');
+          
+          // Scroll to generated key
+          generatedKeyDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async generateBulkKeys() {
+          const count = parseInt(document.getElementById('bulk-count').value);
+          
+          if (!count || count < 1 || count > 50) {
+            this.showToast('Please enter a valid number (1-50)', 'error');
+            return;
+          }
+
+          if (!confirm(`Generate ${count} permanent keys?`)) {
+            return;
+          }
+
+          try {
+            const { doc, setDoc } = window.firebaseModules;
+            const generatedKeys = [];
+
+            for (let i = 0; i < count; i++) {
+              let keyId;
+              let exists = true;
+              
+              while (exists) {
+                keyId = this.generateKeyString(10);
+                try {
+                  const { getDoc } = window.firebaseModules;
+                  const keyDoc = await getDoc(doc(window.firebaseDB, 'activation_keys', keyId));
+                  exists = keyDoc.exists();
+                } catch (error) {
+                  exists = false;
+                }
+              }
+
+              const keyData = {
+                id: keyId,
+                type: 'permanent',
+                isOneTime: false,
+                createdAt: new Date().toISOString(),
+                createdBy: window.authManager.currentUser?.uid || 'admin_bulk',
+                isUsed: false,
+                deviceId: null,
+                activatedAt: null,
+                description: `Bulk generated key ${i + 1}/${count}`,
+                activatedFrom: null
+              };
+
+              await setDoc(doc(window.firebaseDB, 'activation_keys', keyId), keyData);
+              generatedKeys.push(keyId);
+            }
+
+            this.showToast(`Successfully generated ${count} keys!`, 'success');
+            document.getElementById('bulk-count').value = '';
+            
+            // Download keys as text file
+            const keysText = generatedKeys.join('\n');
+            const blob = new Blob([keysText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bulk_keys_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            await this.refreshKeys();
+
+          } catch (error) {
+            console.error('Error generating bulk keys:', error);
+            this.showToast('Failed to generate bulk keys', 'error');
+          }
+        }
+
+        async cleanupExpired() {
+          if (!confirm('Delete all expired keys? This action cannot be undone.')) {
+            return;
+          }
+
+          try {
+            const { deleteDoc, doc } = window.firebaseModules;
+            const now = new Date();
+            let deleted = 0;
+
+            for (const key of this.allKeys) {
+              if (key.expiresAt && new Date(key.expiresAt) < now) {
+                await deleteDoc(doc(window.firebaseDB, 'activation_keys', key.id));
+                deleted++;
+              }
+            }
+
+            this.showToast(`Cleaned up ${deleted} expired keys`, 'success');
+            await this.refreshKeys();
+
+          } catch (error) {
+            console.error('Error cleaning up keys:', error);
+            this.showToast('Failed to cleanup expired keys', 'error');
+          }
+        }
+
+        async deleteAllKeys() {
+          if (!confirm('DELETE ALL KEYS? This will permanently remove all activation keys and cannot be undone!')) {
+            return;
+          }
+
+          if (!confirm('Are you absolutely sure? This will break all existing user access!')) {
+            return;
+          }
+
+          try {
+            const { deleteDoc, doc } = window.firebaseModules;
+            
+            for (const key of this.allKeys) {
+              await deleteDoc(doc(window.firebaseDB, 'activation_keys', key.id));
+            }
+
+            this.showToast('All keys deleted successfully', 'success');
+            await this.refreshKeys();
+
+          } catch (error) {
+            console.error('Error deleting all keys:', error);
+            this.showToast('Failed to delete all keys', 'error');
+          }
+        }
+
+        async exportKeys() {
+          try {
+            const exportData = this.allKeys.map(key => ({
+              id: key.id,
+              type: key.type,
+              isOneTime: key.isOneTime || false,
+              status: this.getKeyStatus(key),
+              created: key.createdAt,
+              expires: key.expiresAt || null,
+              deviceId: key.deviceId || null,
+              description: key.description || '',
+              url: `${this.baseUrl}${key.id}`
+            }));
+
+            const jsonData = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `keys_export_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            this.showToast('Keys data exported successfully', 'success');
+
+          } catch (error) {
+            console.error('Error exporting keys:', error);
+            this.showToast('Failed to export keys data', 'error');
+          }
+        }
+
+        async refreshKeys() {
+          // Show loading
+          document.getElementById('refresh-text').style.display = 'none';
+          document.getElementById('refresh-loading').style.display = 'inline-block';
+
+          try {
+            if (!window.firebaseDB || !window.firebaseModules) {
+              throw new Error('Firebase not initialized');
+            }
+
+            const { collection, getDocs, orderBy, query } = window.firebaseModules;
+            const keysRef = collection(window.firebaseDB, 'activation_keys');
+            
+            try {
+              const keysQuery = query(keysRef, orderBy('createdAt', 'desc'));
+              const querySnapshot = await getDocs(keysQuery);
+              
+              this.allKeys = [];
+              querySnapshot.forEach(doc => {
+                this.allKeys.push({ id: doc.id, ...doc.data() });
+              });
+            } catch (orderError) {
+              // If orderBy fails, try without ordering
+              console.warn('OrderBy failed, fetching without ordering:', orderError);
+              const querySnapshot = await getDocs(keysRef);
+              
+              this.allKeys = [];
+              querySnapshot.forEach(doc => {
+                this.allKeys.push({ id: doc.id, ...doc.data() });
+              });
+              
+              // Sort manually
+              this.allKeys.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return dateB - dateA;
+              });
+            }
+
+            this.filteredKeys = [...this.allKeys];
+            this.updateKeysTable();
+            this.updateStats();
+
+          } catch (error) {
+            console.error('Error loading keys:', error);
+            this.showToast('Failed to load keys', 'error');
+            
+            // Show error in table
+            document.getElementById('keys-table-body').innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--error-color);">
+                  Error loading keys. Please refresh the page.
+                </td>
+              </tr>
+            `;
+          } finally {
+            // Hide loading
+            document.getElementById('refresh-text').style.display = 'inline';
+            document.getElementById('refresh-loading').style.display = 'none';
+          }
+        }
+
+        getKeyStatus(key) {
+          const now = new Date();
+          
+          if (key.expiresAt && new Date(key.expiresAt) < now) {
+            return 'expired';
+          }
+          
+          if (key.isOneTime && key.isUsed) {
+            return 'used';
+          }
+          
+          return 'active';
+        }
+
+        getKeyStatusClass(status) {
+          switch (status) {
+            case 'active': return 'status-active';
+            case 'expired': return 'status-expired';
+            case 'used': return 'status-used';
+            default: return 'status-active';
+          }
+        }
+
+        updateKeysTable() {
+          const tbody = document.getElementById('keys-table-body');
+          
+          if (this.filteredKeys.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem;">
+                  No keys found.
+                </td>
+              </tr>
+            `;
+            return;
+          }
+
+          tbody.innerHTML = this.filteredKeys.map(key => {
+            const status = this.getKeyStatus(key);
+            const statusClass = this.getKeyStatusClass(status);
+            
+            return `
+              <tr>
+                <td>
+                  <span style="font-family: monospace; font-weight: bold;">${key.id}</span>
+                  <br>
+                  <small style="opacity: 0.6;">${this.baseUrl}${key.id}</small>
+                </td>
+                <td>
+                  <span style="text-transform: capitalize;">${key.type}</span>
+                  ${key.isOneTime ? '<br><small>One-time</small>' : ''}
+                </td>
+                <td>
+                  <span class="key-status ${statusClass}">${status.toUpperCase()}</span>
+                </td>
+                <td>${key.createdAt ? new Date(key.createdAt).toLocaleDateString() : 'Unknown'}</td>
+                <td>${key.expiresAt ? new Date(key.expiresAt).toLocaleDateString() : 'Never'}</td>
+                <td>${key.deviceId ? 'Bound' : 'Unbound'}</td>
+                <td>${key.description || '-'}</td>
+                <td>
+                  <button class="btn btn-error" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                           onclick="keyGenerator.deleteKey('${key.id}')">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        updateStats() {
+          const total = this.allKeys.length;
+          const active = this.allKeys.filter(k => this.getKeyStatus(k) === 'active').length;
+          const expired = this.allKeys.filter(k => this.getKeyStatus(k) === 'expired').length;
+          const used = this.allKeys.filter(k => this.getKeyStatus(k) === 'used').length;
+
+          document.getElementById('total-keys').textContent = total;
+          document.getElementById('active-keys').textContent = active;
+          document.getElementById('expired-keys').textContent = expired;
+          document.getElementById('used-keys').textContent = used;
+        }
+
+        filterKeys() {
+          const searchTerm = document.getElementById('search-keys').value.toLowerCase();
+          
+          if (!searchTerm) {
+            this.filteredKeys = [...this.allKeys];
+          } else {
+            this.filteredKeys = this.allKeys.filter(key => 
+              key.id.toLowerCase().includes(searchTerm) ||
+              (key.description && key.description.toLowerCase().includes(searchTerm))
+            );
+          }
+          
+          this.updateKeysTable();
+        }
+
+        async deleteKey(keyId) {
+          if (!confirm(`Delete key ${keyId}? This action cannot be undone.`)) {
+            return;
+          }
+
+          try {
+            const { deleteDoc, doc } = window.firebaseModules;
+            await deleteDoc(doc(window.firebaseDB, 'activation_keys', keyId));
+            
+            this.showToast('Key deleted successfully', 'success');
+            await this.refreshKeys();
+
+          } catch (error) {
+            console.error('Error deleting key:', error);
+            this.showToast('Failed to delete key', 'error');
+          }
+        }
+
+        showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          toast.textContent = message;
+          
+          document.body.appendChild(toast);
+          
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+      }
+
+      // Global functions
+      window.copyToClipboard = function() {
+        const keyDisplay = document.getElementById('key-display');
+        navigator.clipboard.writeText(keyDisplay.textContent).then(() => {
+          keyGenerator.showToast('Key copied to clipboard!', 'success');
+        });
+      };
+
+      window.copyUrlToClipboard = function() {
+        const keyUrl = document.getElementById('key-url');
+        navigator.clipboard.writeText(keyUrl.textContent).then(() => {
+          keyGenerator.showToast('URL copied to clipboard!', 'success');
+        });
+      };
+
+      window.filterKeys = function() {
+        keyGenerator.filterKeys();
+      };
+
+      window.refreshKeys = function() {
+        keyGenerator.refreshKeys();
+      };
+
+      window.generateBulkKeys = function() {
+        keyGenerator.generateBulkKeys();
+      };
+
+      window.cleanupExpired = function() {
+        keyGenerator.cleanupExpired();
+      };
+
+      window.deleteAllKeys = function() {
+        keyGenerator.deleteAllKeys();
+      };
+
+      window.exportKeys = function() {
+        keyGenerator.exportKeys();
+      };
+
+      // Initialize authentication manager
+      window.authManager = new AuthManager();
+    }
+
+    // Start initialization when Firebase is ready
+    if (window.firebaseReady) {
+      initializeApp();
+    } else {
+      window.addEventListener('firebaseReady', initializeApp);
+    }
+  </script>
+</body>
+</html>
